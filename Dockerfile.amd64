@@ -1,0 +1,9 @@
+FROM multiarch/debian-debootstrap:amd64-stretch-slim
+
+RUN apt-get update \
+ && apt-get install --no-install-recommends -y -q ca-certificates openssl wget unbound
+
+WORKDIR /etc/unbound
+RUN wget -O root.hints https://www.internic.net/domain/named.root
+
+ENTRYPOINT ["tail", "-f", "/dev/null"]

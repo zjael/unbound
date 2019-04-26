@@ -1,0 +1,41 @@
+sudo: required
+
+services:
+  - docker
+
+addons:
+  apt:
+    packages:
+      - docker-ce
+
+env:
+  global:
+    - APP=unbound
+    - DOCKER_HUB_USERNAME=zjael
+    - DOCKER_HUB_REPO=unbound
+    - DOCKER_CLI_EXPERIMENTAL=enabled
+  matrix:
+    - DOCKER_TAG=armhf        DOCKER_ARCH=armhf
+    - DOCKER_TAG=arm64        DOCKER_ARCH=arm64
+    - DOCKER_TAG=amd64        DOCKER_ARCH=amd64
+
+script:
+  # setup QEMU
+  - docker run --rm --privileged multiarch/qemu-user-static:register --reset
+  # build image
+  - docker build -t $APP:$DOCKER_TAG -f Dockerfile.$DOCKER_ARCH .
+  # push image
+  - docker login -u="$DOCKER_HUB_USERNAME" -p="$DOCKER_HUB_PASSWORD"
+  - docker tag $APP:$DOCKER_TAG $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:$DOCKER_TAG
+  - docker push $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:$DOCKER_TAG
+
+jobs:
+  include:
+    - stage: Deploy
+      script:
+        - docker manifest create $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:latest $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:armhf $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:arm64 $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:amd64
+        - docker manifest annotate $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:latest $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:armhf --os linux --arch arm
+        - docker manifest annotate $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:latest $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:arm64 --os linux --arch arm64
+        - docker manifest annotate $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:latest $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:amd64 --os linux --arch amd64
+        - docker login -u="$DOCKER_HUB_USERNAME" -p="$DOCKER_HUB_PASSWORD"
+        - docker manifest push $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:latest
