@@ -6,4 +6,8 @@ RUN apt-get update \
 WORKDIR /etc/unbound
 RUN wget -O root.hints https://www.internic.net/domain/named.root
 
-ENTRYPOINT ["tail", "-f", "/dev/null"]
+RUN mkdir /scripts
+ADD unbound.sh /scripts/unbound.sh
+RUN chmod +x /scripts/unbound.sh
+
+ENTRYPOINT ["/scripts/unbound.sh"]
