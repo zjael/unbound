@@ -36,6 +36,5 @@ jobs:
         - docker manifest create $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:latest $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:armhf $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:arm64 $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:amd64
         - docker manifest annotate $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:latest $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:armhf --os linux --arch arm
         - docker manifest annotate $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:latest $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:arm64 --os linux --arch arm64
-        - docker manifest annotate $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:latest $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:amd64 --os linux --arch amd64
         - docker login -u="$DOCKER_HUB_USERNAME" -p="$DOCKER_HUB_PASSWORD"
         - docker manifest push $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPO:latest
